@@ -46,9 +46,9 @@ df <- inner_join(x = origfile_2012, y = svcgfile_2012, by = NULL)
 #df <- arrange(df, ...)
 
 # delete unnecessary variables / select necessary ones:
-df <- df %>% select(dt_first_pi, flag_fthb, id_loan, channel, orig_loan_term
-                    , svcg_cycle, current_upb, delq_sts, loan_age, mi_recoveries, net_sale_proceeds, 
-                    actual_loss, fico, prod_type)
+df <- df %>% select(dt_first_pi, id_loan, channel, orig_loan_term
+                    , svcg_cycle, current_upb, delq_sts, loan_age, 
+                    fico, orig_upb, occpy_sts, cltv, dti)
 
 # set names of remaining variables to lower case
 # (just helps because you don't have to rename some of them)
@@ -62,6 +62,7 @@ df <- rename(df,
              pointintime_month = svcg_cycle, 
              product_name = prod_type,
              term = orig_loan_term,
+             loan_amount = orig_upb,
              #orig_date = ,
              #orig_month = ,
              #loan_period = ,
@@ -76,16 +77,15 @@ df <- rename(df,
              closing_balance = current_upb
 )
 
-# make sure all variables are of the right type: Danie, for this step you need
-# to convert fpd_month and pointintime_,month to dates that are the last day of
-# the month. can do in separate script. 
-df <- df %>%
-  mutate(orig_date = as_date(orig_date)) 
-
 # create/convert variabels that are needed
-# orig_month 
+# convert to date format:
+df <- df %>%
+  mutate(pointintime_month = trans_int_month_date(pointintime_month)) %>%
+  mutate(fpd_month = trans_int_month_date(fpd_month))
 
-df$orig_month <- last_day(df$orig_date)
+# add default flag:
+df <- add_def_month_flag(data = df, default_definition = 3)
+
 
 # contract_key: make sure that the contract key is unique, if not create a
 # unique version
@@ -94,14 +94,13 @@ df$orig_month <- last_day(df$orig_date)
 df <- arrange(df, contract_key, pointintime_month)
 
 # delete any unnecessary rows
-df <- df %>% filter(cancelled != "Yes")
+# df <- df %>% filter(cancelled != "Yes")
 # --------------
 
 
 # do any binning if necessary
 
 # fix any obvious data errors. this should always be well documented. 
-
 
 
 # check that all data types match the data dictionary
