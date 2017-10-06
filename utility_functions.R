@@ -7,8 +7,8 @@
 # Date:           6 Oct 2017 
 # =============================================================================================================
 
-#' last_day
-#'
+#' @title last_day
+#' @description calculate last day of the month given a date.  
 #' @param date 
 #'
 #' @return last day of the month
@@ -20,3 +20,21 @@
 last_day <- function(date) {
   ceiling_date(date, "month") - days(1)
 }
+
+
+#' @title trans_int_month_date
+#'
+#' @param date_var 
+#'
+#' @return date variable in end of month format
+#' @export
+#'
+#' @examples
+#' trans_int_month_date(201601)
+#' df <- df %>% mutate(pointintime_month = trans_int_month_date(pointintime_month))
+trans_int_month_date <- function(date_var) {
+  last_day(ymd(paste0(date_var,11)))
+}
+
+
+
