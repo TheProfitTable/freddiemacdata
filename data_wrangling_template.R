@@ -38,6 +38,10 @@ df2 <- read_excel("LGD data2.xlsx",
                                 "numeric", "numeric", "numeric", 
                                 "text", "numeric", "numeric"))
 df3 <- etc. 
+
+# join any relational tables if necessary
+
+
 # -----------
 
 # bind new data to old
@@ -48,7 +52,7 @@ df <- bind_rows(df, df1, df2)
 # sort correct for easy viewing:
 df <- arrange(df, ...)
 
-# delete unnecessary variables:
+# delete unnecessary variables / select necessary ones:
 df <- df %>% select(-unwanted_variable, ...)
 
 # set names of remaining variables to lower case
@@ -83,7 +87,6 @@ df <- df %>%
 
 # create/convert variabels that are needed
 # orig_month 
-# may no longer be using this. 
 last_day <- function(date) {
   ceiling_date(date, "month") - days(1)
 }
@@ -98,7 +101,9 @@ df <- arrange(df, contract_key, pointintime_month)
 # delete any unnecessary rows
 df <- df %>% filter(cancelled != "Yes")
 # --------------
-#2625346 rows
+
+# do any binning if necessary
+
 
 # fix any obvious data errors. this should always be well documented. 
 

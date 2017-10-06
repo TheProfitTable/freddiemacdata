@@ -9,7 +9,7 @@ names(svcgfile_2012)=c('id_loan','svcg_cycle','current_upb','delq_sts','loan_age
 
 # what do we need:
 # origfile: dt_first_pi, flag_fthb, id_loan, channel, orig_loan_term
-# svcgfile: id_loan, svcg_cycle, current_upb, delq_sts, loan_age, mi_recoveries, net_sale_proceeds, actual_loss
+# svcgfile: id_loan, svcg_cycle, current_upb, delq_sts, loan_age, mi_recoveries, net_sale_proceeds, actual_loss, fico
 # missing: default_date, default_flag
 
 # if lag < current and = defaultdefinition then default_date = pit_date
