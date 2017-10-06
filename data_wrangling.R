@@ -18,6 +18,10 @@ library(tidyverse)
 library(lubridate)
 # ---------
 
+# source functions: 
+source("utility_functions.R")
+source("default_functions.R")
+
 # import data 
 # -----------
 # read_csv from readr saves the file already as a tibble. 
@@ -60,7 +64,7 @@ df <- df %>% select(dt_first_pi, id_loan, channel, orig_loan_term
 df <- rename(df, 
              contract_key = id_loan, 
              pointintime_month = svcg_cycle, 
-             product_name = prod_type,
+             #product_name = prod_type,
              term = orig_loan_term,
              loan_amount = orig_upb,
              #orig_date = ,
