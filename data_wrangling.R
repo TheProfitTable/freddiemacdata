@@ -18,7 +18,7 @@ library(tidyverse)
 library(lubridate)
 # ---------
 
-# source functions: 
+# source functions: insta
 source("utility_functions.R")
 source("default_functions.R")
 
@@ -29,14 +29,36 @@ source("default_functions.R")
 
 # will add the other year files once initial coding and testing is done. 
 
-origfile_2012 <- read_delim("data/sample_orig_2012.txt", delim = "|", col_names = FALSE)
-names(origfile_2012)=c('fico','dt_first_pi','flag_fthb','dt_matr','cd_msa',"mi_pct",'cnt_units','occpy_sts','cltv' ,'dti','orig_upb','ltv','int_rt','channel','ppmt_pnlty','prod_type','st', 'prop_type','zipcode','id_loan','loan_purpose', 'orig_loan_term','cnt_borr','seller_name','servicer_name', 'flag_sc')
+# read all year files into one dataframe (df)
+dataset_start_year <- 1999
+dataset_end_year <- 2016
+dataset_range <- c(dataset_start_year:dataset_end_year)
 
-svcgfile_2012 <- read_delim("data/sample_svcg_2012.txt", delim = "|", col_names = FALSE)
-names(svcgfile_2012)=c('id_loan','svcg_cycle','current_upb','delq_sts','loan_age','mths_remng', 'repch_flag','flag_mod', 'cd_zero_bal', 'dt_zero_bal','current_int_rt','non_int_brng_upb','dt_lst_pi','mi_recoveries', 'net_sale_proceeds','non_mi_recoveries','expenses', 'legal_costs', 'maint_pres_costs','taxes_ins_costs','misc_costs','actual_loss', 'modcost')
+df <- NULL
 
-# join sets 
-df <- inner_join(x = origfile_2012, y = svcgfile_2012, by = NULL)
+for (val in dataset_range) {
+  
+  origfile <- read_delim(paste0("data/sample_orig_", val, ".txt"), delim = "|", col_names = FALSE)
+  names(origfile)=c('fico','dt_first_pi','flag_fthb','dt_matr','cd_msa',"mi_pct",'cnt_units','occpy_sts','cltv' ,'dti','orig_upb','ltv','int_rt','channel','ppmt_pnlty','prod_type','st', 'prop_type','zipcode','id_loan','loan_purpose', 'orig_loan_term','cnt_borr','seller_name','servicer_name', 'flag_sc')
+  
+  svcgfile <- read_delim(paste0("data/sample_svcg_", val, ".txt"), delim = "|", col_names = FALSE)
+  names(svcgfile)=c('id_loan','svcg_cycle','current_upb','delq_sts','loan_age','mths_remng', 'repch_flag','flag_mod', 'cd_zero_bal', 'dt_zero_bal','current_int_rt','non_int_brng_upb','dt_lst_pi','mi_recoveries', 'net_sale_proceeds','non_mi_recoveries','expenses', 'legal_costs', 'maint_pres_costs','taxes_ins_costs','misc_costs','actual_loss', 'modcost')
+  
+  # join sets 
+  df_inner <- inner_join(x = origfile, y = svcgfile, by = NULL)
+  
+  df = rbind(df, df_inner)
+}
+
+# single year files read
+# origfile_2012 <- read_delim("data/sample_orig_2012.txt", delim = "|", col_names = FALSE)
+# names(origfile_2012)=c('fico','dt_first_pi','flag_fthb','dt_matr','cd_msa',"mi_pct",'cnt_units','occpy_sts','cltv' ,'dti','orig_upb','ltv','int_rt','channel','ppmt_pnlty','prod_type','st', 'prop_type','zipcode','id_loan','loan_purpose', 'orig_loan_term','cnt_borr','seller_name','servicer_name', 'flag_sc')
+# 
+# svcgfile_2012 <- read_delim("data/sample_svcg_2012.txt", delim = "|", col_names = FALSE)
+# names(svcgfile_2012)=c('id_loan','svcg_cycle','current_upb','delq_sts','loan_age','mths_remng', 'repch_flag','flag_mod', 'cd_zero_bal', 'dt_zero_bal','current_int_rt','non_int_brng_upb','dt_lst_pi','mi_recoveries', 'net_sale_proceeds','non_mi_recoveries','expenses', 'legal_costs', 'maint_pres_costs','taxes_ins_costs','misc_costs','actual_loss', 'modcost')
+# 
+# # join sets 
+# df <- inner_join(x = origfile_2012, y = svcgfile_2012, by = NULL)
 # -----------
 
 
