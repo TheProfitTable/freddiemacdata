@@ -147,7 +147,7 @@ fico_perc <- quantile(df$fico, c(.33, .66), na.rm = TRUE)
 dti_perc <- quantile(as.numeric(df$dti), c(.33, .66), na.rm = TRUE)
 cltv_perc <- quantile(df$cltv, c(.33, .66), na.rm = TRUE)
 
-dft <- df %>%
+df <- df %>%
   mutate(fico_bin = ifelse(fico < fico_perc[[1]], paste("<", fico_perc[[1]]),
                            ifelse(fico > fico_perc[[2]], paste(">", fico_perc[[2]]), paste(fico_perc[[1]], "-", fico_perc[[2]])))) %>%
   mutate(dti_bin = ifelse(dti < dti_perc[[1]], paste("<", dti_perc[[1]]),
