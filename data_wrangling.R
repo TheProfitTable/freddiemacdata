@@ -140,7 +140,21 @@ df <- arrange(df, contract_key, pointintime_month)
 # --------------
 
 
-# do any binning if necessary
+# binning of continous variables
+# --------------
+# determine 33th and 66th percentile thresholds for variables fico, 
+fico_perc <- quantile(df$fico, c(.33, .66), na.rm = TRUE)
+dti_perc <- quantile(as.numeric(df$dti), c(.33, .66), na.rm = TRUE)
+cltv_perc <- quantile(df$cltv, c(.33, .66), na.rm = TRUE)
+
+df <- df %>%
+  mutate(fico_bin = ifelse(fico < fico_perc[[1]], "Low",
+                           ifelse(fico > fico_perc[[2]], "High", "Medium"))) %>%
+  mutate(dti_bin = ifelse(dti < dti_perc[[1]], "Low",
+                           ifelse(dti > dti_perc[[2]], "High", "Medium"))) %>%
+  mutate(cltv_bin = ifelse(cltv < cltv_perc[[1]], "Low",
+                           ifelse(cltv > cltv_perc[[2]], "High", "Medium")))
+
 
 # fix any obvious data errors. this should always be well documented. 
 
