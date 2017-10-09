@@ -35,7 +35,7 @@ source("default_functions.R")
 # will add the other year files once initial coding and testing is done. 
 
 # read all year files into one dataframe (df)
-dataset_start_year <- 2012
+dataset_start_year <- 2015
 dataset_end_year <- 2016
 dataset_range <- c(dataset_start_year:dataset_end_year)
 
@@ -147,13 +147,13 @@ fico_perc <- quantile(df$fico, c(.33, .66), na.rm = TRUE)
 dti_perc <- quantile(as.numeric(df$dti), c(.33, .66), na.rm = TRUE)
 cltv_perc <- quantile(df$cltv, c(.33, .66), na.rm = TRUE)
 
-df <- df %>%
-  mutate(fico_bin = ifelse(fico < fico_perc[[1]], "Low",
-                           ifelse(fico > fico_perc[[2]], "High", "Medium"))) %>%
-  mutate(dti_bin = ifelse(dti < dti_perc[[1]], "Low",
-                           ifelse(dti > dti_perc[[2]], "High", "Medium"))) %>%
-  mutate(cltv_bin = ifelse(cltv < cltv_perc[[1]], "Low",
-                           ifelse(cltv > cltv_perc[[2]], "High", "Medium")))
+dft <- df %>%
+  mutate(fico_bin = ifelse(fico < fico_perc[[1]], paste("<", fico_perc[[1]]),
+                           ifelse(fico > fico_perc[[2]], paste(">", fico_perc[[2]]), paste(fico_perc[[1]], "-", fico_perc[[2]])))) %>%
+  mutate(dti_bin = ifelse(dti < dti_perc[[1]], paste("<", dti_perc[[1]]),
+                           ifelse(dti > dti_perc[[2]], paste(">", dti_perc[[2]]), paste(dti_perc[[1]], "-", dti_perc[[2]])))) %>%
+  mutate(cltv_bin = ifelse(cltv < cltv_perc[[1]], paste("<", cltv_perc[[1]]),
+                           ifelse(cltv > cltv_perc[[2]], paste(">", cltv_perc[[2]]), paste(cltv_perc[[1]], "-", cltv_perc[[2]]))))
 
 
 # fix any obvious data errors. this should always be well documented. 
@@ -172,3 +172,14 @@ df <- df %>%
 # export data 
 # -----------
 write_rds(x = df, "df.rds", compress = "gz")
+
+
+
+
+
+
+
+
+
+
+
