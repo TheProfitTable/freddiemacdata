@@ -35,7 +35,7 @@ source("default_functions.R")
 # will add the other year files once initial coding and testing is done. 
 
 # read all year files into one dataframe (df)
-dataset_start_year <- 2015
+dataset_start_year <- 2012
 dataset_end_year <- 2016
 dataset_range <- c(dataset_start_year:dataset_end_year)
 
