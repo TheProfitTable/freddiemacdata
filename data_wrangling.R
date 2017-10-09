@@ -54,6 +54,9 @@ for (val in dataset_range) {
   
   df = rbind(df, df_inner)
 }
+# sample: 2012 to 2016 = 6 990 979 obs
+
+rm(df_inner, origfile, svcgfile)
 
 # single year files read
 # origfile_2012 <- read_delim("data/sample_orig_2012.txt", delim = "|", col_names = FALSE)
