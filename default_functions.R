@@ -7,8 +7,6 @@
 # Date:           6 Oct 2017 
 # =============================================================================================================
 
-default_definition <- 3
-
 # default_month
 # =======================================
 
@@ -57,7 +55,7 @@ create_default_month <- function(data, default_definition) {
 #' df_test <- add_def_month_flag(df, 3)
 #' 
 add_def_month_flag <- function(data, default_definition) {
-  df_def_flag <- create_default_month(df, 3)
+  df_def_flag <- create_default_month(df, default_definition)
   
   df_def_flag_join <- inner_join(x = df, y = df_def_flag, by = "contract_key") %>%
     mutate(default_flag = if_else(pointintime_month >= default_month, true = 1, false = 0))

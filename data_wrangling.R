@@ -18,6 +18,11 @@ library(tidyverse)
 library(lubridate)
 # ---------
 
+# set default definition
+# -----------------------
+default_definition <- 3
+# -----------------------
+
 # source functions: insta
 source("utility_functions.R")
 source("default_functions.R")
@@ -110,7 +115,15 @@ df <- df %>%
   mutate(fpd_month = trans_int_month_date(fpd_month))
 
 # add default flag:
-df <- add_def_month_flag(data = df, default_definition = 3)
+df <- add_def_month_flag(data = df, default_definition = default_definition)
+
+# create orig_month and loan_period from fdp. 
+# these data dimensions are missing from the data set
+# this is not a accurate transformation, but just
+# a hack to have them in the set. 
+df <- df %>%
+  mutate(orig_month = fpd_month) %>%
+  mutate(loan_period = fpd_period) 
 
 
 # contract_key: make sure that the contract key is unique, if not create a
