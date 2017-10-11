@@ -79,10 +79,16 @@ rm(df_inner, origfile, svcgfile)
 # sort correct for easy viewing:
 #df <- arrange(df, ...)
 
+
+# get percentage NAs in every column (can make informed decision to disregard column as potential segmentor variable)
+#col_means <- colMeans(is.na(df))
+
+
 # delete unnecessary variables / select necessary ones:
-df <- df %>% select(dt_first_pi, id_loan, channel, orig_loan_term
-                    , svcg_cycle, current_upb, delq_sts, loan_age, 
-                    fico, orig_upb, occpy_sts, cltv, dti)
+df <- df %>% select(dt_first_pi, id_loan, channel, orig_loan_term,
+                    svcg_cycle, current_upb, delq_sts, loan_age, 
+                    fico, orig_upb, occpy_sts, cltv, dti,
+                    prod_type, prop_type, seller_name, servicer_name, loan_purpose, cnt_borr, zipcode, st)
 
 # set names of remaining variables to lower case
 # (just helps because you don't have to rename some of them)
@@ -94,7 +100,7 @@ df <- df %>% select(dt_first_pi, id_loan, channel, orig_loan_term
 df <- rename(df, 
              contract_key = id_loan, 
              pointintime_month = svcg_cycle, 
-             #product_name = prod_type,
+             product_name = prod_type,
              term = orig_loan_term,
              loan_amount = orig_upb,
              #orig_date = ,
@@ -108,7 +114,10 @@ df <- rename(df,
              #payment = ,
              months_arrears = delq_sts,
              #instalment  = ,
-             closing_balance = current_upb
+             closing_balance = current_upb,
+             property_type = prop_type,
+             number_of_borrowers = cnt_borr,
+             us_state = st
 )
 
 # create/convert variabels that are needed
