@@ -9,7 +9,7 @@ You can get more information around the data set, as well as the user manual and
 
 #### Scope
 
-The scope of this repo is to convert the Freddie Mac data to the standard format used by The Profit Table for loan analysis in all of our packages. Please see [this repo](https://github.com/TheProfitTable/masterlibrary/blob/master) for the data dictionary. You can also acces our style guide and on boarding information there. 
+The scope of this repo is to convert the Freddie Mac data to the standard format used by The Profit Table for loan analysis in all of our packages. Please see [this repo](https://github.com/TheProfitTable/masterlibrary) for the data dictionary. You can also acces our style guide and on boarding information there. 
 
 The main output of the script is a data frame (df) used for analysis using the [loanportr](https://github.com/TheProfitTable/loanportr) package. We are currently reading in the Freddie Mac sample data from 2012 onwards as this results in a data frame of an easily manageable size. 
 
