@@ -15,7 +15,7 @@ The main output of the script is a data frame (df) used for analysis using the [
 
 #### Improvements and Work To Be Done
 
-* Fix data issue whereby loan performance history stops prematurely (no more rows for that contract past a certain date).  
+* Fix data issue whereby loan performance history stops prematurely (no more rows for that contract past a certain date). See [Issue #8](https://github.com/TheProfitTable/freddiemacdata/issues/8) for more details.   
 * Create a very small sample set to accompany the [loanportr](https://github.com/TheProfitTable/loanportr) package as lazy data.  
 
-NOTE: issues for the above still to be logged. 
+NOTE: issue for the above still to be logged. 
