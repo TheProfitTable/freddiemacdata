@@ -38,8 +38,8 @@ trans_int_month_date <- function(date_var) {
 
 
 #' @title get_trimmed_contracts
-#' @description get the list of contracts with incomplete performance history considering the last available 
-#'              month in the dataset
+#' @description get the list of contracts with incomplete performance history 
+#'              considering the last available month in the dataset
 #' @param data a data frame that contains at least contract_key and pointintime_month
 #'
 #' @return named list of contract_key with continuity issues
