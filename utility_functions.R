@@ -102,3 +102,24 @@ get_df_trimmed_contracts <- function(data) {
 }
 
 
+#' @title get_prop_trimmed_contracts
+#' @description get the proportion of contracts with incomplete performance history 
+#'              considering the last available month in the dataset
+#' @param data a data frame that contains at least contract_key and pointintime_month
+#'
+#' @return proportion (percentage in decimals) of contracts with continuity issues
+#' @export
+#'
+#' @examples
+#' get_prop_trimmed_contracts(df) 
+get_prop_trimmed_contracts <- function(data) {
+  # TODO(floresfdev): 
+  # Proof of Concept. To be defined how to proceed with this computation
+  # Ongoing discussion on GH issue #8
+  n_total_contracts <- nrow(get_contracts_by_last_month(data))
+  n_trimmed_contracts <- nrow(get_df_trimmed_contracts(data))
+  
+  return(n_trimmed_contracts / n_total_contracts)
+}
+
+
