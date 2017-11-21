@@ -102,24 +102,34 @@ get_df_trimmed_contracts <- function(data) {
 }
 
 
-#' @title get_prop_trimmed_contracts
-#' @description get the proportion of contracts with incomplete performance history 
-#'              considering the last available month in the dataset
+#' @title has_continuity_issues
+#' @description analyze if the data has continuity issues considering the last available
+#'              month in the dataset, and get the proportion of contracts with incomplete
+#'              performance history 
 #' @param data a data frame that contains at least contract_key and pointintime_month
 #'
-#' @return proportion (percentage in decimals) of contracts with continuity issues
+#' @return a list with 2 named elements:
+#'         - has_continuity_issues = TRUE/FALSE
+#'         - proportion_trimmed_contracts = proportion (percentage in decimals) of 
+#'         contracts with continuity issues
 #' @export
 #'
 #' @examples
-#' get_prop_trimmed_contracts(df) 
-get_prop_trimmed_contracts <- function(data) {
+#' continuity_issues <- has_continuity_issues(df) 
+has_continuity_issues <- function(data) {
   # TODO(floresfdev): 
   # Proof of Concept. To be defined how to proceed with this computation
   # Ongoing discussion on GH issue #8
   n_total_contracts <- nrow(get_contracts_by_last_month(data))
   n_trimmed_contracts <- nrow(get_df_trimmed_contracts(data))
   
-  return(n_trimmed_contracts / n_total_contracts)
+  has_continuity_issues <- (n_trimmed_contracts > 0)
+  proportion_trimmed_contracts <- n_trimmed_contracts / n_total_contracts
+  
+  return_list <- list("has_continuity_issues" = has_continuity_issues,
+                      "proportion_trimmed_contracts" = proportion_trimmed_contracts)
+  
+  return(return_list)
 }
 
 
