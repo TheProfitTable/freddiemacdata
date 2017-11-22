@@ -37,99 +37,82 @@ trans_int_month_date <- function(date_var) {
 }
 
 
-#' @title get_list_trimmed_contracts
-#' @description get the list of contracts with incomplete performance history 
-#'              considering the last available month in the dataset
-#' @param data a data frame that contains at least contract_key and pointintime_month
-#'
-#' @return named list of contract_key with continuity issues
-#' @export
-#'
-#' @examples
-#' contract_list <- get_list_trimmed_contracts(df)
-#' contract_list$contract_key
-get_list_trimmed_contracts <- function(data) {
-  ## Note: pull() is available on dplyr since v0.7.0
-  contract_list <- 
-    get_df_trimmed_contracts(data) %>% 
-    pull(contract_key) %>% 
-    list("contract_key" = .)
-  
-  return(contract_list)
-}
-
-
-#' @title get_contracts_by_last_month
+#' @title get_contracts_by_stop_month
 #' @description creates a data frame of contracts with their respective last month reported
-#' @param data a data frame that contains at least contract_key and pointintime_month
+#' @param data a data frame that contains at least \code{contract_key} and \code{pointintime_month}
 #'
-#' @return a data frame with contract_key and the last pointintime_month reported for each one
+#' @return a data frame with \code{contract_key} and \code{max_pointintime_month}, which
+#'         is the last \code{pointintime_month} reported for each one
 #' @export
 #'
 #' @examples
-#' by_last_month <- get_contracts_by_last_month(df)
-get_contracts_by_last_month <- function(data) {
-  by_last_month <-
+#' by_stop_month <- get_contracts_by_stop_month(df)
+get_contracts_by_stop_month <- function(data) {
+  by_stop_month <-
     data %>% 
     group_by(contract_key) %>% 
     summarize(max_pointintime_month = max(pointintime_month)) %>% 
     ungroup()
   
-  return(by_last_month)
+  return(by_stop_month)
 }
 
 
-#' @title get_df_trimmed_contracts
-#' @description get a data frame of contracts with incomplete performance history 
-#'              considering the last available month in the dataset
-#' @param data a data frame that contains at least contract_key and pointintime_month
+#' @title get_continuity_issues
+#' @description get the list and proportion of contracts with incomplete performance 
+#'              history considering the last available month in the dataset.
+#' @param data a data frame that contains at least \code{contract_key} and \code{pointintime_month}
 #'
-#' @return data frame of contract_key and max_pointintime_month with continuity issues
-#' @export
-#'
-#' @examples
-#' contract_df <- get_df_trimmed_contracts(df)
-get_df_trimmed_contracts <- function(data) {
-  by_last_month <- get_contracts_by_last_month(data)
-  
-  last_month_in_df <- max(by_last_month$max_pointintime_month)
-  
-  contract_df <- 
-    by_last_month %>% 
-    filter(max_pointintime_month < last_month_in_df)
-  
-  return(contract_df)
-}
-
-
-#' @title has_continuity_issues
-#' @description analyze if the data has continuity issues considering the last available
-#'              month in the dataset, and get the proportion of contracts with incomplete
-#'              performance history 
-#' @param data a data frame that contains at least contract_key and pointintime_month
-#'
-#' @return a list with 2 named elements:
-#'         - has_continuity_issues = TRUE/FALSE
-#'         - proportion_trimmed_contracts = proportion (percentage in decimals) of 
+#' @return list with two elements:
+#'         - \code{contract_key}: list of contracts with continuity issues
+#'         - \code{proportion_stopped_contracts}: proportion (percentage in decimals) of 
 #'         contracts with continuity issues
 #' @export
 #'
 #' @examples
-#' continuity_issues <- has_continuity_issues(df) 
+#' continuity_issues <- get_continuity_issues(df)
+#' continuity_issues$contract_key
+#' continuity_issues$proportion_stopped_contracts
+get_continuity_issues <- function(data) {
+  by_stop_month <- get_contracts_by_stop_month(data)
+
+  last_stop_month <- max(by_stop_month$max_pointintime_month)
+  
+  # Note: pull() is available on dplyr since v0.7.0
+  continuity_issues <- 
+    by_stop_month %>% 
+    filter(max_pointintime_month < last_stop_month) %>% 
+    pull(contract_key) %>% 
+    list("contract_key" = .)
+  
+  n_stopped_contracts <- length(continuity_issues$contract_key)
+  n_total_contracts <- nrow(by_stop_month)
+  
+  continuity_issues$proportion_stopped_contracts <- n_stopped_contracts / n_total_contracts
+  
+  return(continuity_issues)
+}
+
+
+#' @title has_continuity_issues
+#' @description analyze if the data has incomplete performance history considering 
+#'              the last available month per contract.
+#' @param data a data frame that contains at least \code{contract_key} and \code{pointintime_month}
+#'
+#' @return \code{TRUE} if at least one contract has continuity issues, \code{FALSE} otherwise.
+#' @export
+#'
+#' @examples
+#' if (has_continuity_issues(df)) {
+#'   message("At least one contract in the data frame has incomplete history. Please check.")
+#' }
 has_continuity_issues <- function(data) {
-  # TODO(floresfdev): 
-  # Proof of Concept. To be defined how to proceed with this computation
-  # Ongoing discussion on GH issue #8
-  n_total_contracts <- nrow(get_contracts_by_last_month(data))
-  n_trimmed_contracts <- nrow(get_df_trimmed_contracts(data))
+  by_stop_month <- get_contracts_by_stop_month(data)
+
+  last_stop_month <- max(by_stop_month$max_pointintime_month)
+  first_stop_month <- min(by_stop_month$max_pointintime_month)
   
-  has_continuity_issues <- (n_trimmed_contracts > 0)
-  proportion_trimmed_contracts <- n_trimmed_contracts / n_total_contracts
-  
-  return_list <- list("has_continuity_issues" = has_continuity_issues,
-                      "proportion_trimmed_contracts" = proportion_trimmed_contracts)
-  
-  return(return_list)
+  return(last_stop_month > first_stop_month)
 }
 
 
