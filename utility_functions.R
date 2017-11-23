@@ -134,17 +134,30 @@ has_continuity_issues <- function(data) {
 complete_history <- function(data) {
   last_stop_month <- max(data$pointintime_month)  
 
-  # TODO(floresfdev): Proof of Concept for padding the missing performance history
   # Dependency: Package padr v0.4.0
-  data <-
+  data_complete <-
     data %>% 
-    thicken(by = "pointintime_month",
+    thicken(by = "pointintime_month", 
             interval = "month") %>% 
     pad(by = "pointintime_month_month",
+        group = "contract_key",
         interval = "month",
-        end_val = last_stop_month) %>%
-    tidyr::fill(-c(pointintime_month, fpd_period, loan_period))
-    # TODO(floresfdev): Incremental filling for pointintime_month, fpd_period and loan_period
+        end_val = last_stop_month,
+        break_above = 2) %>%
+    tidyr::fill(-c(pointintime_month, fpd_period, loan_period)) %>% 
+    mutate(pointintime_month = if_else(is.na(pointintime_month),
+                                       last_day(pointintime_month_month),
+                                       pointintime_month)) %>% 
+    group_by(group_cum_sum = cumsum(!is.na(fpd_period)), contract_key) %>% 
+    # Avoiding if_else() here because strict type checking is raising issues
+    # see: https://github.com/tidyverse/dplyr/issues/2365
+    mutate(fpd_period = if (n() > 1) {fpd_period[1L] + row_number() - 1} else {fpd_period}) %>%
+    ungroup %>% 
+    mutate(loan_period = if_else(is.na(loan_period),
+                                 as.integer(fpd_period),
+                                 as.integer(loan_period))) %>% 
+    select(-c(pointintime_month_month, group_cum_sum))
+  
+  return(data_complete)
 }
-
 
