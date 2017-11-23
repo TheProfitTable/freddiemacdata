@@ -47,6 +47,7 @@ trans_int_month_date <- function(date_var) {
 #'
 #' @examples
 #' by_stop_month <- get_contracts_by_stop_month(df)
+#' 
 get_contracts_by_stop_month <- function(data) {
   by_stop_month <-
     data %>% 
@@ -73,6 +74,7 @@ get_contracts_by_stop_month <- function(data) {
 #' continuity_issues <- get_continuity_issues(df)
 #' continuity_issues$contract_key
 #' continuity_issues$proportion_stopped_contracts
+#' 
 get_continuity_issues <- function(data) {
   by_stop_month <- get_contracts_by_stop_month(data)
 
@@ -106,6 +108,7 @@ get_continuity_issues <- function(data) {
 #' if (has_continuity_issues(df)) {
 #'   message("At least one contract in the data frame has incomplete history. Please check.")
 #' }
+#' 
 has_continuity_issues <- function(data) {
   by_stop_month <- get_contracts_by_stop_month(data)
 
@@ -113,6 +116,35 @@ has_continuity_issues <- function(data) {
   first_stop_month <- min(by_stop_month$max_pointintime_month)
   
   return(last_stop_month > first_stop_month)
+}
+
+
+#' @title complete_history
+#' @description fill the missing rows in contracts with continuity issues up to the 
+#'              last \code{pointintime_month} in the data frame.
+#' @param data a data frame that contains at least \code{contract_key}, \code{pointintime_month},
+#'             \code{fpd_period} and \code{loan_period}
+#'
+#' @return the input data frame with extra rows inserted to solve continuity issues
+#' @export
+#'
+#' @examples
+#' df_complete <- complete_history(df)
+#' 
+complete_history <- function(data) {
+  last_stop_month <- max(data$pointintime_month)  
+
+  # TODO(floresfdev): Proof of Concept for padding the missing performance history
+  # Dependency: Package padr v0.4.0
+  data <-
+    data %>% 
+    thicken(by = "pointintime_month",
+            interval = "month") %>% 
+    pad(by = "pointintime_month_month",
+        interval = "month",
+        end_val = last_stop_month) %>%
+    tidyr::fill(-c(pointintime_month, fpd_period, loan_period))
+    # TODO(floresfdev): Incremental filling for pointintime_month, fpd_period and loan_period
 }
 
 
