@@ -151,7 +151,7 @@ complete_history <- function(data) {
     group_by(group_cum_sum = cumsum(!is.na(fpd_period)), contract_key) %>% 
     # Avoiding if_else() here because strict type checking is raising issues
     # see: https://github.com/tidyverse/dplyr/issues/2365
-    mutate(fpd_period = if (n() > 1) {fpd_period[1L] + row_number() - 1} else {fpd_period}) %>%
+    mutate(fpd_period = if (n() > 1) as.integer(fpd_period[1L] + row_number() - 1) else fpd_period) %>%
     ungroup %>% 
     mutate(loan_period = if_else(is.na(loan_period),
                                  as.integer(fpd_period),
