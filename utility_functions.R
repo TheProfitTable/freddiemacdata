@@ -132,11 +132,19 @@ has_continuity_issues <- function(data) {
 #' df_complete <- complete_history(df)
 #' 
 complete_history <- function(data) {
-  last_stop_month <- max(data$pointintime_month)  
+  last_stop_month <- max(data$pointintime_month)
+  
+  # Used on workaround for missing values in fico and cltv columns (issue #12)
+  UNKNOWN_STRING <- "unknown"
 
   # Dependency: Package padr v0.4.0
   data_complete <-
     data %>% 
+    # Workaround for missing values in fico and cltv columns (issue #12)
+    replace_na(list(fico = UNKNOWN_STRING, 
+                    fico_bin = UNKNOWN_STRING,
+                    cltv = UNKNOWN_STRING,
+                    cltv_bin = UNKNOWN_STRING)) %>% 
     thicken(by = "pointintime_month", 
             interval = "month") %>% 
     pad(by = "pointintime_month_month",
@@ -156,8 +164,13 @@ complete_history <- function(data) {
     mutate(loan_period = if_else(is.na(loan_period),
                                  as.integer(fpd_period),
                                  as.integer(loan_period))) %>% 
-    select(-c(pointintime_month_month, group_cum_sum))
-  
+    select(-c(pointintime_month_month, group_cum_sum)) %>% 
+    # Workaround for missing values in fico and cltv columns (issue #12)
+    mutate(fico = replace(fico, which(fico == UNKNOWN_STRING), NA),
+           fico_bin = replace(fico_bin, which(fico_bin == UNKNOWN_STRING), NA),
+           cltv = replace(cltv, which(cltv == UNKNOWN_STRING), NA),
+           cltv_bin = replace(cltv_bin, which(cltv_bin == UNKNOWN_STRING), NA))
+
   return(data_complete)
 }
 
