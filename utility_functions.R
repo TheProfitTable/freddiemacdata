@@ -136,14 +136,15 @@ complete_history <- function(data) {
   
   # Used on workaround for missing values in fico and cltv columns (issue #12)
   UNKNOWN_STRING <- "unknown"
+  UNKNOWN_INT <- 0
 
   # Dependency: Package padr v0.4.0
   data_complete <-
     data %>% 
     # Workaround for missing values in fico and cltv columns (issue #12)
-    replace_na(list(fico = UNKNOWN_STRING, 
+    replace_na(list(fico = as.integer(UNKNOWN_INT), 
                     fico_bin = UNKNOWN_STRING,
-                    cltv = UNKNOWN_STRING,
+                    cltv = as.integer(UNKNOWN_INT),
                     cltv_bin = UNKNOWN_STRING)) %>% 
     thicken(by = "pointintime_month", 
             interval = "month") %>% 
@@ -151,7 +152,7 @@ complete_history <- function(data) {
         group = "contract_key",
         interval = "month",
         end_val = last_stop_month,
-        break_above = 2) %>%
+        break_above = 10) %>%
     tidyr::fill(-c(pointintime_month, fpd_period, loan_period)) %>% 
     mutate(pointintime_month = if_else(is.na(pointintime_month),
                                        last_day(pointintime_month_month),
@@ -166,9 +167,9 @@ complete_history <- function(data) {
                                  as.integer(loan_period))) %>% 
     select(-c(pointintime_month_month, group_cum_sum)) %>% 
     # Workaround for missing values in fico and cltv columns (issue #12)
-    mutate(fico = replace(fico, which(fico == UNKNOWN_STRING), NA),
+    mutate(fico = replace(fico, which(fico == UNKNOWN_INT), NA),
            fico_bin = replace(fico_bin, which(fico_bin == UNKNOWN_STRING), NA),
-           cltv = replace(cltv, which(cltv == UNKNOWN_STRING), NA),
+           cltv = replace(cltv, which(cltv == UNKNOWN_INT), NA),
            cltv_bin = replace(cltv_bin, which(cltv_bin == UNKNOWN_STRING), NA))
 
   return(data_complete)
