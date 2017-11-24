@@ -7,6 +7,15 @@
 # Date:           6 Oct 2017 
 # =============================================================================================================
 
+
+# Constants used in functions
+
+# Used on workaround for missing values columns (issue #12)
+UNKNOWN_STRING <- "unknown"
+UNKNOWN_INT <- -1
+UNKNOWN_DATE <- as.Date("2222-12-31")
+
+
 #' @title last_day
 #' @description calculate last day of the month given a date.  
 #' @param date 
@@ -134,18 +143,12 @@ has_continuity_issues <- function(data) {
 complete_history <- function(data) {
   last_stop_month <- max(data$pointintime_month)
   
-  # Used on workaround for missing values in fico and cltv columns (issue #12)
-  UNKNOWN_STRING <- "unknown"
-  UNKNOWN_INT <- 0
+  # Replace NA with default values
+  data_complete <- impute_na(data)
 
   # Dependency: Package padr v0.4.0
   data_complete <-
-    data %>% 
-    # Workaround for missing values in fico and cltv columns (issue #12)
-    replace_na(list(fico = as.integer(UNKNOWN_INT), 
-                    fico_bin = UNKNOWN_STRING,
-                    cltv = as.integer(UNKNOWN_INT),
-                    cltv_bin = UNKNOWN_STRING)) %>% 
+    data_complete %>% 
     thicken(by = "pointintime_month", 
             interval = "month") %>% 
     pad(by = "pointintime_month_month",
@@ -165,13 +168,99 @@ complete_history <- function(data) {
     mutate(loan_period = if_else(is.na(loan_period),
                                  as.integer(fpd_period),
                                  as.integer(loan_period))) %>% 
-    select(-c(pointintime_month_month, group_cum_sum)) %>% 
-    # Workaround for missing values in fico and cltv columns (issue #12)
-    mutate(fico = replace(fico, which(fico == UNKNOWN_INT), NA),
-           fico_bin = replace(fico_bin, which(fico_bin == UNKNOWN_STRING), NA),
-           cltv = replace(cltv, which(cltv == UNKNOWN_INT), NA),
-           cltv_bin = replace(cltv_bin, which(cltv_bin == UNKNOWN_STRING), NA))
+    select(-c(pointintime_month_month, group_cum_sum))
+  
+  # Replace default values with NA
+  data_complete <- reset_na(data_complete)
 
   return(data_complete)
+}
+
+
+#' @title impute_na
+#' @description Impute NA in some columns of the performance history data with a default value
+#' @param data a data frame that contains the processed columns:
+#'             - \code{months_arrears}
+#'             - \code{fico}
+#'             - \code{cltv}
+#'             - \code{dti}
+#'             - \code{default_flag}
+#'             - \code{default_month}
+#'             - \code{fico_bin}
+#'             - \code{cltv_bin}
+#'             - \code{dti_bin}
+#'
+#' @return the input data frame with default values instead of NA in the affected columns
+#' @export
+#'
+#' @examples
+#' df_imputed <- impute_na(df)
+#' 
+impute_na <- function(data) {
+  # Column details:
+  #
+  # months_arrears - int  - includes 0 usually
+  # fico           - int  - ...
+  # cltv           - int  - ...
+  # dti            - int  - ...
+  # default_flag   - num  - includes 0 usually
+  # default_month  - Date - constant value "2222-01-01" (at the moment)
+  # fico_bin       - chr  - ...
+  # cltv_bin       - chr  - ...
+  # dti_bin        - chr  - ...
+  
+  # TODO(floresfdev): Generalize to unobserved cases
+  data_processed <- 
+    data %>% 
+    # Workaround for missing values (issue #12)
+    replace_na(list(months_arrears = as.integer(UNKNOWN_INT),
+                    fico = as.integer(UNKNOWN_INT), 
+                    cltv = as.integer(UNKNOWN_INT),
+                    dti = as.integer(UNKNOWN_INT),
+                    default_flag = as.numeric(UNKNOWN_INT),
+                    default_month = as.Date(UNKNOWN_DATE),
+                    fico_bin = UNKNOWN_STRING,
+                    cltv_bin = UNKNOWN_STRING,
+                    dti_bin = UNKNOWN_STRING))
+  
+  return(data_processed)
+}
+
+
+#' @title reset_na
+#' @description Reinstate NA from a default value in some columns of the performance history data
+#' @param data a data frame that contains the processed columns:
+#'             - \code{months_arrears}
+#'             - \code{fico}
+#'             - \code{cltv}
+#'             - \code{dti}
+#'             - \code{default_flag}
+#'             - \code{default_month}
+#'             - \code{fico_bin}
+#'             - \code{cltv_bin}
+#'             - \code{dti_bin}
+#'
+#' @return the input data frame with NA instead of the default values in the affected columns
+#' @export
+#'
+#' @examples
+#' df_na_reset <- reset_na(df_imputed)
+#' 
+reset_na <- function(data) {
+  # TODO(floresfdev): Generalize to unobserved values
+  data_processed <- 
+    data %>% 
+    # Workaround for missing values (issue #12)
+    mutate(months_arrears = replace(months_arrears, which(months_arrears == UNKNOWN_INT), NA),
+           fico = replace(fico, which(fico == UNKNOWN_INT), NA),
+           cltv = replace(cltv, which(cltv == UNKNOWN_INT), NA),
+           dti = replace(dti, which(dti == UNKNOWN_INT), NA),
+           default_flag = replace(default_flag, which(default_flag == UNKNOWN_INT), NA),
+           default_month = replace(default_month, which(default_month == UNKNOWN_DATE), NA),
+           fico_bin = replace(fico_bin, which(fico_bin == UNKNOWN_STRING), NA),
+           cltv_bin = replace(cltv_bin, which(cltv_bin == UNKNOWN_STRING), NA),
+           dti_bin = replace(dti_bin, which(dti_bin == UNKNOWN_STRING), NA))
+  
+  return(data_processed)
 }
 
